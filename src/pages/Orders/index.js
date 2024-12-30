@@ -23,26 +23,26 @@ import Select from "@mui/material/Select";
 function Orders() {
   const [orders, setOrders] = useState([]);
 
-  // Fetch orders on component mount
+
   useEffect(() => {
     getOrders().then((data) => {
-      console.log(data); // Debug to ensure the correct data is fetched
+      console.log(data); 
       setOrders(data);
     });
   }, []);
 
-  // Handle deleting an order
+
   const handleDelete = async (id) => {
     const deleted = await deleteOrder(id);
     if (deleted) {
       toast.success("Product deleted successfully");
-      setOrders(orders.filter((order) => order._id !== id)); // Remove deleted order from state
+      setOrders(orders.filter((order) => order._id !== id)); 
     } else {
       toast.error("Failed to delete product");
     }
   };
 
-  // Handle status change
+
   const handleStatusChange = async (id, newStatus) => {
     try {
       const updatedOrder = await updateOrderStatus(id, newStatus);
