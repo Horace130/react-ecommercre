@@ -63,17 +63,3 @@ export const deleteProduct = async (_id) => {
     toast.error(error.response.data.error);
   }
 };
-
-export const addCart = async (_id, name, description, price, category) => {
-  try {
-    const response = await axios.put(API_URL + "/products/" + _id, {
-      name: name,
-      description: description,
-      price: price,
-      category: category,
-    });
-    return response.data;
-  } catch (error) {
-    toast.error(error.response.data.error);
-  }
-};

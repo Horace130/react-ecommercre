@@ -8,7 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
 
-function TableList({ items, onAddToCart, onRemoveFromCart, showAddToCart }) {
+function TableList({ items, AddToCart, RemoveFromCart, showAddToCart }) {
   return (
     <TableContainer component={Paper}>
       <Table
@@ -38,7 +38,7 @@ function TableList({ items, onAddToCart, onRemoveFromCart, showAddToCart }) {
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={() => onAddToCart(item)}
+                      onClick={() => AddToCart(item)}
                     >
                       Add to Cart
                     </Button>
@@ -46,7 +46,7 @@ function TableList({ items, onAddToCart, onRemoveFromCart, showAddToCart }) {
                     <Button
                       variant="outlined"
                       color="secondary"
-                      onClick={() => onRemoveFromCart(item.id)}
+                      onClick={() => RemoveFromCart(item.id)}
                     >
                       Remove
                     </Button>

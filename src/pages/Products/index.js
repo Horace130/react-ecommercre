@@ -1,19 +1,22 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Container, Button, Typography, Box } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
 import { InputLabel, MenuItem, FormControl, Select } from "@mui/material";
-import { toast } from "sonner";
-import { getProducts } from "../../utils/api_products";
-import { getCategories } from "../../utils/api_categories";
 import { ArrowRight, ArrowLeft } from "@mui/icons-material";
 import Header from "../../components/Header";
-import { deleteProduct } from "../../utils/api_products"; // Add deleteProduct import
+import { toast } from "sonner";
+
+import { getProducts } from "../../utils/api_products";
+import { getCategories } from "../../utils/api_categories";
+import { deleteProduct } from "../../utils/api_products";
+import { AddToCart } from "../../utils/api_cart";
 
 function Products() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -32,26 +35,9 @@ function Products() {
   }, []);
 
   const handleAddToCart = (product) => {
-    const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existingProduct = existingCart.find(
-      (item) => item._id === product._id
-    );
-
-    if (existingProduct) {
-      existingProduct.quantity += 1;
-      existingProduct.totalPrice = (
-        existingProduct.quantity * product.price
-      ).toFixed(2);
-    } else {
-      existingCart.push({
-        ...product,
-        quantity: 1,
-        totalPrice: product.price.toFixed(2),
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(existingCart));
-    toast.success("Product added to the cart!");
+    // trigger add to cart function
+    AddToCart(product);
+    toast.success(`${product.name} has been added to Cart`);
   };
 
   const handleDelete = async (id) => {
@@ -59,12 +45,16 @@ function Products() {
       "Are you sure you want to delete this product?"
     );
     if (confirmed) {
-      const success = await deleteProduct(id); // Call deleteProduct function
-      if (success) {
-        setProducts(products.filter((product) => product._id !== id)); // Remove deleted product from state
-        toast.success("Product deleted successfully!");
+      const deleted = await deleteProduct(id);
+      if (deleted) {
+        // get the latest products data from the API again
+        const latestProducts = await getProducts(category, page);
+        // update the products state with the latest data
+        setProducts(latestProducts);
+        // show success message
+        toast.success("Product deleted successfully");
       } else {
-        toast.error("Failed to delete the product.");
+        toast.error("Failed to delete product");
       }
     }
   };
@@ -87,8 +77,11 @@ function Products() {
           Add New
         </Button>
       </Box>
-
-      <Box sx={{ padding: "10px 0" }}>
+      <Box
+        sx={{
+          padding: "10px 0",
+        }}
+      >
         <FormControl sx={{ minWidth: 120 }}>
           <InputLabel id="demo-simple-select-label">Category</InputLabel>
           <Select
@@ -98,19 +91,17 @@ function Products() {
             label="category"
             onChange={(event) => {
               setCategory(event.target.value);
-              setPage(1); // reset to first page when category changes
+              // reset the page back to page 1
+              setPage(1);
             }}
           >
             <MenuItem value="all">All Products</MenuItem>
-            {categories.map((category) => (
-              <MenuItem key={category} value={category}>
-                {category}
-              </MenuItem>
-            ))}
+            {categories.map((category) => {
+              return <MenuItem value={category}>{category}</MenuItem>;
+            })}
           </Select>
         </FormControl>
       </Box>
-
       <Grid container spacing={2}>
         {products.length > 0 ? (
           products.map((product) => (
@@ -149,12 +140,14 @@ function Products() {
                   <Button
                     variant="contained"
                     fullWidth
-                    onClick={() => handleAddToCart(product)}
                     sx={{
                       marginBottom: "10px",
                       backgroundColor: "#1976d2",
                       textTransform: "none",
                       "&:hover": { backgroundColor: "#115293" },
+                    }}
+                    onClick={() => {
+                      handleAddToCart(product);
                     }}
                   >
                     Add to Cart
@@ -163,6 +156,9 @@ function Products() {
                     display={"flex"}
                     justifyContent={"space-between"}
                     alignItems={"center"}
+                    sx={{
+                      marginLeft: "0px !important",
+                    }}
                   >
                     <Button
                       variant="outlined"
@@ -200,12 +196,13 @@ function Products() {
           </Grid>
         )}
       </Grid>
-
       <Box
         display={"flex"}
         justifyContent={"space-between"}
         alignItems={"center"}
-        sx={{ padding: "20px 0 40px 0" }}
+        sx={{
+          padding: "20px 0 40px 0",
+        }}
       >
         <Button
           variant="contained"
