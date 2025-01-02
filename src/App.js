@@ -8,6 +8,8 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import PaymentVerify from "./pages/PaymentVerify";
 import Orders from "./pages/Orders";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
 
 function App() {
   return (
@@ -22,6 +24,9 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/verify-payment" element={<PaymentVerify />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+
         </Routes>
       </BrowserRouter>
       <Toaster richColors position="top-right" />
