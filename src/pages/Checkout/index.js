@@ -24,10 +24,14 @@ import Table from "@mui/material/Table";
 import { toast } from "sonner";
 import { validateEmail } from "../../utils/email";
 import { createOrder } from "../../utils/api_orders";
+import { getUserToken } from "../../utils/api_auth";
+import { useCookies } from "react-cookie";
 
 function Checkout() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [cookies] = useCookies(["currentUser"]);
+  const token = getUserToken(cookies);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,7 +50,7 @@ function Checkout() {
       // show loader
       setLoading(true);
       // 2. trigger the createOrder function
-      const response = await createOrder(name, email, cart, totalPrice);
+      const response = await createOrder(name, email, cart, totalPrice, token);
       // 3. get the billplz url from response
       const billplz_url = response.billplz_url;
       // 4. redirect the user to billplz payment page

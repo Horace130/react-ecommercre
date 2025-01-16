@@ -1,121 +1,93 @@
-import { useState, useEffect } from "react";
-import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import Header from "../../components/Header";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Container, Typography, Box, TextField, Button } from "@mui/material";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Button from "@mui/material/Button";
-import { addNewUser } from "../../utils/api_signup";
+import Header from "../../components/Header";
 import { toast } from "sonner";
-import { Link, useNavigate } from "react-router-dom";
+import { signup } from "../../utils/api_auth";
 
-function Signup() {
-  const navigate = useNavigate();
+function SignUp() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleAddNewUser = async (event) => {
-    event.preventDefault();
+  const handleFormSubmit = async () => {
     // check for error
     if (!name || !email || !password || !confirmPassword) {
-      toast.error("Please fill out all the required fields");
-    }
-
-    const newUserData = await addNewUser(
-      name,
-      email,
-      password,
-      confirmPassword
-    );
-
-    // check if the newProductData exists or not
-    if (newUserData) {
-      // show success message
-      toast.success("User has been created successfully");
-      console.log(newUserData);
-      // redirect back to home page
-      navigate("/login");
+      toast.error("Please fill up all the fields");
+    } else if (password !== confirmPassword) {
+      toast.error("Your password does not match");
+    } else {
+      // trigger the API
+      const userData = await signup(name, email, password);
+      localStorage.setItem("user", userData);
+      console.log(userData);
     }
   };
+
   return (
     <Container>
-      <Header title="Create a New Account" />
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <Grid container spacing={4}>
-          <Grid item xs={12}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Card sx={{ maxWidth: 600, width: "100%" }}>
-                <CardContent>
-                  <Box mb={4}>
-                    <TextField
-                      label="Name"
-                      required
-                      fullWidth
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                    />
-                  </Box>
-                  <Box mb={4}>
-                    <TextField
-                      label="Email"
-                      required
-                      fullWidth
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                    />
-                  </Box>
-                  <Box mb={4}>
-                    <TextField
-                      label="Password"
-                      type="password"
-                      required
-                      fullWidth
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                    />
-                  </Box>
-                  <Box mb={4}>
-                    <TextField
-                      label="confirmPassword"
-                      type="confirmPassword"
-                      required
-                      fullWidth
-                      value={confirmPassword}
-                      onChange={(event) =>
-                        setConfirmPassword(event.target.value)
-                      }
-                    />
-                  </Box>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={handleAddNewUser}
-                  >
-                    Sign Up
-                  </Button>
-                </CardContent>
-              </Card>
+      <Header />
+      <Container maxWidth="sm">
+        <Card elevation={5}>
+          <CardContent>
+            <Typography variant="h4" align="center" mb={4}>
+              Sign Up
+            </Typography>
+            <Box mb={2}>
+              <TextField
+                label="Name"
+                required
+                fullWidth
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+              />
             </Box>
-          </Grid>
-        </Grid>
-      </Box>
+            <Box mb={2}>
+              <TextField
+                label="Email"
+                type="email"
+                required
+                fullWidth
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </Box>
+            <Box mb={2}>
+              <TextField
+                label="Password"
+                type="password"
+                required
+                fullWidth
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </Box>
+            <Box mb={2}>
+              <TextField
+                label="Confirm Password"
+                type="password"
+                required
+                fullWidth
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+              />
+            </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={handleFormSubmit}
+            >
+              Submit
+            </Button>
+          </CardContent>
+        </Card>
+      </Container>
     </Container>
   );
 }
 
-export default Signup;
+export default SignUp;

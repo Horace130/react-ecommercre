@@ -1,9 +1,23 @@
 import { Typography, Box, Button } from "@mui/material";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import { isUserLoggedIn } from "../../utils/api_auth";
+import { clearCart } from "../../utils/api_cart";
 
 function Header(props) {
   const { title = "Welcome To My Store" } = props;
+  const [cookies, removeCookie] = useCookies(["currentUser"]);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // clear the cookies
+    removeCookie("currentUser");
+    //clear the cart
+    clearCart();
+    // redirect the user back to login page
+    navigate("/login");
+  };
 
   return (
     <Box
@@ -23,66 +37,105 @@ function Header(props) {
       >
         {title}
       </Typography>
-      <Box display="flex" justifyContent="center" gap={2} sx={{ marginTop: 1 }}>
-        <Button
-          variant={location.pathname === "/" ? "contained" : "outlined"}
-          color="primary"
-          LinkComponent={Link}
-          to="/"
-          sx={{
-            padding: "10px 20px",
-          }}
-        >
-          Home
-        </Button>
+      <Box display="flex">
+        <Box display="flex" gap={2} sx={{ marginTop: 1 }}>
+          <Button
+            variant={location.pathname === "/" ? "contained" : "outlined"}
+            color="primary"
+            LinkComponent={Link}
+            to="/"
+            sx={{
+              padding: "10px 20px",
+            }}
+          >
+            Home
+          </Button>
 
-        <Button
-          variant={location.pathname === "/cart" ? "contained" : "outlined"}
-          color="primary"
-          LinkComponent={Link}
-          to="/cart"
-          sx={{
-            padding: "10px 20px",
-          }}
-        >
-          Cart
-        </Button>
+          <Button
+            variant={location.pathname === "/cart" ? "contained" : "outlined"}
+            color="primary"
+            LinkComponent={Link}
+            to="/cart"
+            sx={{
+              padding: "10px 20px",
+            }}
+          >
+            Cart
+          </Button>
 
-        <Button
-          variant={location.pathname === "/orders" ? "contained" : "outlined"}
-          color="primary"
-          LinkComponent={Link}
-          to="/orders"
-          sx={{
-            padding: "10px 20px",
-          }}
-        >
-          My Orders
-        </Button>
+          <Button
+            variant={location.pathname === "/orders" ? "contained" : "outlined"}
+            color="primary"
+            LinkComponent={Link}
+            to="/orders"
+            sx={{
+              padding: "10px 20px",
+            }}
+          >
+            My Orders
+          </Button>
+          <Button
+            variant={
+              location.pathname === "/categories" ? "contained" : "outlined"
+            }
+            color="primary"
+            LinkComponent={Link}
+            to="/categories"
+            sx={{
+              padding: "10px 20px",
+            }}
+          >
+            Categories
+          </Button>
+        </Box>
 
-        <Button
-          variant={location.pathname === "/signup" ? "contained" : "outlined"}
-          color="primary"
-          LinkComponent={Link}
-          to="/signup"
-          sx={{
-            padding: "10px 20px",
-          }}
-        >
-          Signup
-        </Button>
-
-        <Button
-          variant={location.pathname === "/login" ? "contained" : "outlined"}
-          color="primary"
-          LinkComponent={Link}
-          to="/login"
-          sx={{
-            padding: "10px 20px",
-          }}
-        >
-          Login
-        </Button>
+        <Box marginLeft={"auto"} gap={2} sx={{ marginTop: 1 }}>
+          {isUserLoggedIn(cookies) ? (
+            <Box display={"flex"} alignItems={"center"}>
+              <Typography>Current User:{cookies.currentUser.name}</Typography>
+              <Button
+                color="primary"
+                sx={{
+                  padding: "10px 20px",
+                }}
+                onClick={() => {
+                  handleLogout();
+                }}
+              >
+                Logout
+              </Button>
+            </Box>
+          ) : (
+            <>
+              <Button
+                variant={
+                  location.pathname === "/login" ? "contained" : "outlined"
+                }
+                color="primary"
+                LinkComponent={Link}
+                to="/login"
+                sx={{
+                  padding: "10px 20px",
+                }}
+              >
+                Login
+              </Button>
+              <Button
+                variant={
+                  location.pathname === "/signup" ? "contained" : "outlined"
+                }
+                color="primary"
+                LinkComponent={Link}
+                to="/signup"
+                sx={{
+                  padding: "10px 20px",
+                }}
+              >
+                Sign Up
+              </Button>
+            </>
+          )}
+        </Box>
       </Box>
     </Box>
   );

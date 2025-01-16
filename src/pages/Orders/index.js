@@ -16,31 +16,35 @@ import {
 import Header from "../../components/Header";
 import { toast } from "sonner";
 import { getOrders, updateOrder, deleteOrder } from "../../utils/api_orders";
+import { getUserToken } from "../../utils/api_auth";
+import { useCookies } from "react-cookie";
 
 function Orders() {
+  const [cookies] = useCookies(["currentUser"]);
+  const token = getUserToken(cookies);
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    getOrders().then((data) => {
+    getOrders(token).then((data) => {
       setOrders(data);
     });
   }, []);
 
   const handleStatusUpdate = async (_id, status) => {
-    const updatedOrder = await updateOrder(_id, status);
+    const updatedOrder = await updateOrder(_id, status, token);
     if (updatedOrder) {
       // fetch the updated orders from API
-      const updatedOrders = await getOrders();
+      const updatedOrders = await getOrders(token);
       setOrders(updatedOrders);
       toast.success("Order status has been updated");
     }
   };
 
   const handleOrderDelete = async (_id) => {
-    const response = await deleteOrder(_id);
+    const response = await deleteOrder(_id, token);
     if (response && response.status === "success") {
       // fetch the updated orders from API
-      const updatedOrders = await getOrders();
+      const updatedOrders = await getOrders(token);
       setOrders(updatedOrders);
       toast.success("Order has been deleted");
     }
@@ -62,7 +66,7 @@ function Orders() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {orders.length > 0 ? (
+            {orders && orders.length > 0 ? (
               orders.map((order) => (
                 <TableRow key={order._id}>
                   <TableCell>
@@ -78,23 +82,22 @@ function Orders() {
                   <TableCell>${order.totalPrice.toFixed(2)}</TableCell>
                   <TableCell>
                     <FormControl fullWidth>
-                      <Select
-                        value={order.status}
-                        disabled={order.status === "pending" ? true : false}
-                        onChange={(event) => {
-                          handleStatusUpdate(order._id, event.target.value);
-                        }}
-                      >
-                        <MenuItem
-                          disabled={order.status !== "pending" ? true : false}
-                          value="pending"
+                      {order.status === "pending" ? (
+                        <Select value={order.status} disabled={true}>
+                          <MenuItem value="pending">Pending</MenuItem>
+                        </Select>
+                      ) : (
+                        <Select
+                          value={order.status}
+                          onChange={(event) => {
+                            handleStatusUpdate(order._id, event.target.value);
+                          }}
                         >
-                          Pending
-                        </MenuItem>
-                        <MenuItem value="paid">Paid</MenuItem>
-                        <MenuItem value="failed">Failed</MenuItem>
-                        <MenuItem value="completed">Completed</MenuItem>
-                      </Select>
+                          <MenuItem value="paid">Paid</MenuItem>
+                          <MenuItem value="failed">Failed</MenuItem>
+                          <MenuItem value="completed">Completed</MenuItem>
+                        </Select>
+                      )}
                     </FormControl>
                   </TableCell>
                   <TableCell>
